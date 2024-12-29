@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard - Health-e</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header img {
+            height: 50px;
+            margin-left: 10px;
+        }
+        .profile {
+            margin-right: 20px;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+        }
+        nav a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .container {
+            padding: 20px;
+        }
+        .diagnosis-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .diagnosis-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .diagnosis-container form {
+            display: flex;
+            flex-direction: column;
+        }
+        .diagnosis-container form select,
+        .diagnosis-container form input {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .diagnosis-container form button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .diagnosis-container form button:hover {
+            background-color: #45a049;
+        }
+        .contact-doctor {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 20px;
+            background-color: #28a745;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .contact-doctor:hover {
+            background-color: #218838;
+        }
+        .doctors-list {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .doctors-list h2 {
+            text-align: center;
+        }
+        .doctors-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .doctors-list li {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .doctors-list button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .doctors-list button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img alt="Health-e logo" src="assets/1.png" />
+        <h1>Health-e Self Diagnosis App - Patient Dashboard</h1>
+        <div class="profile" id="profile-name"></div>
+    </header>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="patient.html">Patient Dashboard</a>
+        <a href="doctor.html">Doctor Dashboard</a>
+        <a href="admin.html">Admin Dashboard</a>
+    </nav>
+    <div class="container">
+        <div class="diagnosis-container">
+            <h2>Self Diagnosis</h2>
+            <form onsubmit="return diagnose(event)">
+                <select id="symptoms" required>
+                    <option disabled selected value="">Select your symptom</option>
+                    <option value="fever">Fever</option>
+                    <option value="headache">Headache</option>
+                    <option value="cough">Cough</option>
+                    <option value="stomachache">Stomachache</option>
+                    <option value="fatigue">Fatigue</option>
+                    <option value="chest pain">Chest Pain</option>
+                    <option value="skin rash">Skin Rash</option>
+                    <option value="joint pain">Joint Pain</option>
+                </select>
+                <input id="duration" placeholder="How long have you been suffering?" required type="text"/>
+                <button type="submit">Diagnose</button>
+            </form>
+            <div class="diagnosis-result" id="diagnosis-result" style="display:none;">
+                <h3>Diagnosis Result</h3>
+                <p id="disease"></p>
+                <p id="cure"></p>
+                <a class="contact-doctor" onclick="contactDoctor()">Contact a Doctor</a>
+            </div>
+        </div>
+
+        <div class="doctors-list">
+            <h2>Doctors List</h2>
+            <ul id="doctors-list">
+                <!-- Doctor list items dynamically added here -->
+            </ul>
+        </div>
+
+    </div>
+    <footer>
+        <p>Health-e Self Diagnosis App</p>
+    </footer>
+    <script>
+        
+        function diagnose(event) {
+            event.preventDefault();
+            const symptoms = document.getElementById('symptoms').value;
+            const duration = document.getElementById('duration').value;
+            let disease = '';
+            let cure = '';
+
+            const symptomMap = {
+                fever: ['You might have the flu.', 'Rest, drink plenty of fluids, and take over-the-counter medications.'],
+                headache: ['You might have a migraine.', 'Rest in a dark, quiet room and take pain relievers.'],
+                cough: ['You might have a common cold.', 'Stay hydrated, rest, and take cough suppressants.'],
+                stomachache: ['You might have indigestion.', 'Avoid spicy foods, drink plenty of water, and take antacids.'],
+                fatigue: ['You might have anemia.', 'Consume iron-rich foods and consult a doctor for supplements.'],
+                'chest pain': ['You might have heart issues.', 'Seek immediate medical attention.'],
+                'skin rash': ['You might have an allergic reaction.', 'Apply a soothing cream and avoid allergens.'],
+                'joint pain': ['You might have arthritis.', 'Apply warm compresses and take anti-inflammatory medication.']
+            };
+
+            [disease, cure] = symptomMap[symptoms] || ['Please consult a doctor.', 'No specific recommendation.'];
+
+            document.getElementById('disease').innerText = disease;
+            document.getElementById('cure').innerText = cure;
+            document.getElementById('diagnosis-result').style.display = 'block';
+        }
+
+        function contactDoctor() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const phoneNumber = prompt('Enter your 10-digit mobile number:');
+
+            if (!/^[0-9]{10}$/.test(phoneNumber)) {
+                alert('Please enter a valid 10-digit mobile number.');
+                return;
+            }
+
+            if (currentUser) {
+                const contactData = {
+                    username: currentUser.username,
+                    mobile: phoneNumber,
+                    disease: document.getElementById('disease').innerText,
+                };
+
+                let doctorContacts = JSON.parse(localStorage.getItem('doctorContacts')) || [];
+                doctorContacts.push(contactData);
+                localStorage.setItem('doctorContacts', JSON.stringify(doctorContacts));
+                alert(`Your details, including phone number ${phoneNumber}, have been sent to a doctor.`);
+            } else {
+                alert('Please log in to contact a doctor.');
+            }
+        }
+
+        function loadDoctorsList() {
+            const doctorsListElement = document.getElementById('doctors-list');
+            const doctors = JSON.parse(localStorage.getItem('doctors')) || [];
+
+            if (doctors.length === 0) {
+                doctorsListElement.innerHTML = '<p>No doctors available.</p>';
+                return;
+            }
+
+            doctors.forEach(doctor => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span>${doctor.username} ${doctor.verified ? '<span style="color: green;">(Verified)</span>' : ''}</span>
+                    <button onclick="contactSpecificDoctor('${doctor.username}')">Contact</button>
+                `;
+                doctorsListElement.appendChild(listItem);
+            });
+        }
+
+        function contactSpecificDoctor(doctorUsername) {
+            alert(`You have contacted Dr. ${doctorUsername}.`);
+        }
+
+        window.onload = function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                document.getElementById('profile-name').innerText = `Welcome, ${currentUser.username}`;
+            }
+            loadDoctorsList();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Health-e</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            margin: 0;
+        }
+        .container {
+            padding: 20px;
+        }
+        .list-section {
+            margin: 20px 0;
+        }
+        .list-section h2 {
+            margin-bottom: 10px;
+        }
+        .list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .list-item {
+            background-color: white;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .list-item button {
+            margin-left: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .list-item button:hover {
+            background-color: #45a049;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Admin Dashboard</h1>
+    </header>
+    <div class="container">
+        <section class="list-section">
+            <h2>Pending Doctor Verifications</h2>
+            <ul class="list" id="verification-list">
+                <!-- Verification requests dynamically added here -->
+            </ul>
+        </section>
+
+        <section class="list-section">
+            <h2>Doctors List</h2>
+            <ul class="list" id="doctors-list">
+                <!-- Doctor items dynamically added here -->
+            </ul>
+        </section>
+
+        <section class="list-section">
+            <h2>Patients List</h2>
+            <ul class="list" id="patients-list">
+                <!-- Patient items dynamically added here -->
+            </ul>
+        </section>
+    </div>
+    <footer>
+        <p>© 2024 Health-e Self Diagnosis App. All rights reserved.</p>
+    </footer>
+    <script>
+        function loadLists() {
+            const verificationListElement = document.getElementById('verification-list');
+            const doctorsListElement = document.getElementById('doctors-list');
+            const patientsListElement = document.getElementById('patients-list');
+
+            const verificationRequests = JSON.parse(localStorage.getItem('verificationRequests')) || [];
+            const doctors = JSON.parse(localStorage.getItem('doctors')) || [];
+            const patients = JSON.parse(localStorage.getItem('patients')) || [];
+
+            // Load verification requests
+            verificationListElement.innerHTML = '';
+            verificationRequests.forEach(request => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-item';
+                listItem.innerHTML = `
+                    <span><strong>${request.username}</strong> - ${request.specialty}</span>
+                    <button onclick="verifyDoctor('${request.username}')">Verify</button>
+                    <button onclick="rejectVerification('${request.username}')">Reject</button>
+                `;
+                verificationListElement.appendChild(listItem);
+            });
+
+            // Load doctors
+            doctorsListElement.innerHTML = '';
+            doctors.forEach(doctor => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-item';
+                listItem.innerHTML = `
+                    <span>${doctor.username} ${doctor.verified ? '<span style="color: green;">(Verified)</span>' : ''}</span>
+                    <button onclick="removeDoctor('${doctor.username}')">Remove</button>
+                `;
+                doctorsListElement.appendChild(listItem);
+            });
+
+            // Load patients
+            patientsListElement.innerHTML = '';
+            patients.forEach(patient => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-item';
+                listItem.innerHTML = `
+                    <span>${patient.username} - ${patient.disease || 'No disease listed'}</span>
+                    <button onclick="removePatient('${patient.username}')">Remove</button>
+                `;
+                patientsListElement.appendChild(listItem);
+            });
+        }
+
+        function verifyDoctor(username) {
+            let doctors = JSON.parse(localStorage.getItem('doctors')) || [];
+            let verificationRequests = JSON.parse(localStorage.getItem('verificationRequests')) || [];
+
+            const doctor = doctors.find(doc => doc.username === username);
+            if (doctor) {
+                doctor.verified = true;
+                localStorage.setItem('doctors', JSON.stringify(doctors));
+
+                verificationRequests = verificationRequests.filter(req => req.username !== username);
+                localStorage.setItem('verificationRequests', JSON.stringify(verificationRequests));
+
+                alert(`Doctor ${username} has been verified.`);
+                loadLists();
+            }
+        }
+
+        function rejectVerification(username) {
+            let verificationRequests = JSON.parse(localStorage.getItem('verificationRequests')) || [];
+            verificationRequests = verificationRequests.filter(req => req.username !== username);
+            localStorage.setItem('verificationRequests', JSON.stringify(verificationRequests));
+
+            alert(`Verification request for ${username} has been rejected.`);
+            loadLists();
+        }
+
+        function removeDoctor(username) {
+            let doctors = JSON.parse(localStorage.getItem('doctors')) || [];
+            doctors = doctors.filter(doctor => doctor.username !== username);
+            localStorage.setItem('doctors', JSON.stringify(doctors));
+            loadLists();
+        }
+
+        function removePatient(username) {
+            let patients = JSON.parse(localStorage.getItem('patients')) || [];
+            patients = patients.filter(patient => patient.username !== username);
+            localStorage.setItem('patients', JSON.stringify(patients));
+            loadLists();
+        }
+
+        window.onload = function() {
+            loadLists();
+        };
+    </script>
+</body>
+</html>

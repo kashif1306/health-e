@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health-e: Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background: url('assets/175932.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        header {
+            font-family: 'Roboto', sans-serif;
+            font-weight: bold;
+            background-color: #f7ffff;
+            color: rgb(0, 0, 0);
+            padding: 5px 0;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        header img {
+            height: 70px;
+            margin-left: 10px;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: rgba(131, 91, 224, 0.1);
+        }
+        nav a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .container {
+            margin: 20px auto;
+            text-align: center;
+        }
+        .widget {
+            margin: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            width: 300px;
+        }
+        .auth-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .auth-container h2 {
+            margin-bottom: 20px;
+        }
+        .auth-container input, .auth-container select, .auth-container button {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .auth-container button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        .auth-container button:hover {
+            background-color: #45a049;
+        }
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            margin: 40px auto;
+            max-width: 700px;
+        }
+        .carousel img {
+            flex: 0 0 auto;
+            width: 100%;
+            max-width: 200px;
+            margin: 0 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img alt="Health-e Logo" src="assets/1.png" />
+        <h1 style="font-size:3vw;">Health-e Self Health Diagnosis App</h1>
+    </header>
+    <nav>
+        <a href="#" onclick="toggleForm('login')">Login</a>
+        <a href="#" onclick="toggleForm('register')">Register</a>
+        <a href="#diagnosis">Diagnosis</a>
+        <a href="#news">Health News</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="container">
+        <section id="carousel">
+            <h2>Health Tips</h2>
+            <div class="carousel">
+                <img src="assets/carousel1.jpg" alt="Health Tip 1">
+                <img src="assets/carousel2.jpg" alt="Health Tip 2">
+                <img src="assets/carousel3.jpg" alt="Health Tip 3">
+            </div>
+        </section>
+        <div class="widget">
+            <h3>Health Tips</h3>
+            <p>Discover daily health tips to stay fit and strong.</p>
+        </div>
+        <div class="widget">
+            <h3>Testimonials</h3>
+            <p>See what others are saying about Health-e.</p>
+        </div>
+        <div class="widget">
+            <h3>FAQs</h3>
+            <p>Find answers to frequently asked questions.</p>
+        </div>
+    </div>
+
+    <div id="login-form" class="auth-container hidden">
+        <h2>Login</h2>
+        <form onsubmit="return login(event)">
+            <input id="username" type="text" placeholder="Username" required />
+            <input id="password" type="password" placeholder="Password" required />
+            <select id="role" required>
+                <option value="" disabled selected>Select Role</option>
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+                <option value="admin">Admin</option>
+            </select>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <div id="register-form" class="auth-container hidden">
+        <h2>Register</h2>
+        <form onsubmit="return register(event)">
+            <input id="regUsername" type="text" placeholder="Username" required />
+            <input id="regPassword" type="password" placeholder="Password" required />
+            <input id="regDisease" type="text" placeholder="Disease (if Patient)" />
+            <select id="regRole" required>
+                <option value="" disabled selected>Select Role</option>
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+            </select>
+            <button type="submit">Register</button>
+        </form>
+    </div>
+
+    <script>
+        function toggleForm(form) {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById(`${form}-form`).classList.remove('hidden');
+        }
+
+        function login(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            const storedUser = JSON.parse(localStorage.getItem(username));
+
+            if (storedUser && storedUser.password === password && storedUser.role === role) {
+                localStorage.setItem('currentUser', JSON.stringify(storedUser));
+                alert(`Login successful as ${role}`);
+                if (role === 'patient') window.location.href = 'patient.html';
+                if (role === 'doctor') window.location.href = 'doctor.html';
+                if (role === 'admin') window.location.href = 'admin.html';
+            } else {
+                alert('Invalid credentials. Please try again.');
+            }
+        }
+
+        function register(event) {
+            event.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const role = document.getElementById('regRole').value;
+            const disease = document.getElementById('regDisease').value;
+
+            if (localStorage.getItem(username)) {
+                alert('Username already exists.');
+            } else {
+                const user = { username, password, role, disease: role === 'patient' ? disease : undefined };
+                localStorage.setItem(username, JSON.stringify(user));
+
+                if (role === 'doctor') {
+                    const doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
+                    doctors.push(user);
+                    localStorage.setItem('doctors', JSON.stringify(doctors));
+                }
+
+                alert('Registration successful!');
+                toggleForm('login');
+            }
+        }
+    </script>
+</body>
+</html>
